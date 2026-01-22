@@ -33,8 +33,8 @@ This repo demonstrates:
 
 ## Environment
 - vSphere environment with sufficient compute, storage, and networking  
-- DNS records pointing to cluster APIs and nodes  
-- Local workstation with Podman / Docker available for appliance build  
+- DNS records pointing to cluster APIs and APPs  
+- Local workstation with Podman available for appliance build  
 - Access to Red Hat pull secret (for connected installation)
 
 ## DNS Requirements
@@ -44,7 +44,7 @@ DNS records for:
 - `*.apps.<cluster-domain>`
 
 ## Install nmstate in the Laptop were you will build the Base Config ISO
-This is required to build the config ISO, and when the agent-config.yaml is using static IP assignement.
+This is required to build the config ISO, using static IP in agent-config.yaml.
 
 In RHEL: 
 ```sh
@@ -59,7 +59,7 @@ export GOVC_USERNAME='administrator@vsphere.local'
 export GOVC_PASSWORD="$(< /home/lmartinh/.passwords/vcenter)"
 export GOVC_INSECURE=1
 
-#Vars used to save VMs NIC MAC Address
+#Vars used to save VMs NIC MAC Address - these vars will be set after VMs creation
 export MAC_MASTER0
 export MAC_MASTER1
 export MAC_MASTER2
@@ -74,13 +74,15 @@ export OCP_INSTALL_VERSION='4.19.21'
 
 # Creating VSphere Virtual Machines
 
-Before installation, create three VMs and enable `disk.EnableUUID=TRUE` (required for OpenShift installation).  
+Before installation, create three VMs and enable `disk.EnableUUID=TRUE` (required for OpenShift installation).
+
 Example with `govc`:
 
 ## Create VMs
 
 **Master0**
-Mind: The RendevousIP node, in my case Master0, will host the OpenShift images, that will be used to create the OpenShift cluster.
+
+Mind: The RendevousIP node, in my case Master0, will host the bootstrap node, that will be used to create the OpenShift cluster.
  
 ```sh
 govc vm.create \
@@ -148,7 +150,7 @@ govc vm.create \
   govc vm.change -vm master1 -e disk.EnableUUID=TRUE
   govc vm.change -vm master2 -e disk.EnableUUID=TRUE
 
-  Confirm configuration:
+  #Confirm configuration:
   govc vm.info -e master0 | grep -i enableuuid
   govc vm.info -e master1 | grep -i enableuuid
   govc vm.info -e master2 | grep -i enableuuid
@@ -188,7 +190,9 @@ echo "${MAC_MASTER0}--${MAC_MASTER1}--${MAC_MASTER2}"
 ## Set Enviremont Variables
 
 ```sh
+#image of the openshift-appliance RAW and ISO builder
 export APPLIANCE_IMAGE="quay.io/edge-infrastructure/openshift-appliance:latest"
+
 export APPLIANCE_ASSETS="/home/test/appliance_assets"
 ```
 
@@ -220,7 +224,7 @@ Modify the `appliance-config.yaml` to the following, adapt it to your needs:
     mv appliance-config.yaml appliance-config.yaml.original-generated
     ```
 
-* Configure file to my needs
+* Configure file to my specific needs
 
     ```sh
     cat <<EOF > appliance-config.yaml
@@ -305,7 +309,7 @@ sudo podman run --rm -it --pull newer --privileged --net=host -v $APPLIANCE_ASSE
   - The ISO can be mounted directly using the VM virtual media.
   - No additional devices (such as a USB drive) are required to write or clone the Base RAW image.
 
-* Create script file to invoke on completion of the OS installation
+* Create script file and customize it to your needs - this script is invoked on completion of the OS installation
 
     Run:
     ```sh
@@ -346,7 +350,7 @@ sudo podman run --rm -it --pull newer --privileged --net=host -v $APPLIANCE_ASSE
 
 
 # Generate the Config ISO Image
-* The config ISO will contain the install-config.yaml and agent-config.yaml, that will be used to install the OpenShift cluster as per this manifests configuration.
+* The config ISO will contain the manifests generated as part of the install-config.yaml and agent-config.yaml configuration.
 
 * I will install a three node OpenShift cluster, so each Master will have the role of Master and Worker.
 
@@ -552,7 +556,7 @@ The content of `cluster_config` directory should be
 
 **Notes:** 
 - The config ISO contains configurations and **cannot** be used as a bootable ISO.
-- Make sure to use the *openshift-install* binary on the OpenShift version that you want to install**
+- Make sure to use the *openshift-install* binary on the OpenShift version that you want to install.
 
 
 
@@ -568,9 +572,8 @@ Example:
 ```
 
 # Clone Base ISO disk image to the Virtual Machine Disk
-This will create the volumes in and clone the Base ISO (RHCOS Operating System) to the Virtual Machines disk.
 
-- Mount the Base ISO on the Virtual Media (in this case CDROM) of the Virtual Machine.
+- Mount the Base ISO on the Virtual Media (in this case CDROM) of all three Virtual Machines.
 
     Note: If you prefer, instead of using the Base ISO you can use the Base RAW image wich should been burned into a USB stick in advanced (not documented in this repo ).
 
