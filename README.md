@@ -22,10 +22,10 @@ OpenShift Appliance Builder creates a **self-contained image** that embeds the O
 This enables installations without requiring access to external registries.
 
 This repo demonstrates:
-1. Creating vSphere VMs for the cluster nodes
-1. Building a base appliance image (RAW or ISO)
-1. Generating a cluster configuration ISO
-1. Booting the cluster nodes from that configuration ISO to install OpenShift.
+- Creating VSphere Virtual Machines
+- Generate the Base RAW disk image and ISO disk image 
+- Generate the Config ISO Image
+- Install OpenShift in the Virtual Machines
 
 ---
 
@@ -596,7 +596,7 @@ This will create the volumes in and clone the Base ISO (RHCOS Operating System) 
 Once the OS is cloned the Post Script will kick in and shutdown the VMs/Nodes.
 
 
-# Install OpenShift in the Virtual Machines in the Remote site
+# Install OpenShift in the Virtual Machines
 
 Unmount the Base ISO and mount the Config ISO.
 In this setup, VMware did not allow unmounting the Base ISO and mounting the Config ISO while the virtual machines were powered on.
