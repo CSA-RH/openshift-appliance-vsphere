@@ -7,8 +7,8 @@ This content has not been tested on every configuration.
 
 
 # Purpose  
-This repo document how to build and deploy a three-node OpenShift cluster on VMware vSphere using the **OpenShift Appliance Builder**, usinf static IPs.  
-This repository provides an example workflow (not production-ready) for delivering an Agent-Based Installer image and cluster configuration ISO.
+This repo document how to build and deploy a three-node OpenShift cluster on VMware vSphere using the **OpenShift Appliance Builder**, using static IPs.  
+This repository provides an example workflow for delivering an Agent-Based Installer image and cluster configuration ISO.
 
 # :warning: Important Notice
 The OpenShift Appliance Builder is currently **Technology Preview** and **not supported for production use**.  
@@ -20,6 +20,8 @@ Do **not** rely on this method for production OpenShift clusters.
 
 OpenShift Appliance Builder creates a **self-contained image** that embeds the OpenShift release, an internal registry, the Red Hat installer, and all required assets into a single disk image (RAW or ISO).  
 This enables installations without requiring access to external registries.
+Note that the VMs will be installed using the Base ISO, if you prefer using the Base RAW disk image check the procedure in this [repo](https://github.com/openshift/appliance/blob/master/docs/user-guide.md)
+
 
 This repo demonstrates:
 - Creating VSphere Virtual Machines
@@ -34,7 +36,7 @@ This repo demonstrates:
 ## Environment
 - vSphere environment with sufficient compute, storage, and networking  
 - DNS records pointing to cluster APIs and APPs  
-- Local workstation with Podman available for appliance build  
+- Local workstation with Podman available for appliance build (must be run with privilidge mode - sudo)
 - Access to Red Hat pull secret (for connected installation)
 
 ## DNS Requirements
